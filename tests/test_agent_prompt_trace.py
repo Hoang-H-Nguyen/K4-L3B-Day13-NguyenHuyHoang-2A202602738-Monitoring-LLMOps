@@ -20,6 +20,19 @@ class RecordingLangfuseClient:
     def __init__(self) -> None:
         self.prompt = ManagedPrompt()
         self.span_updates: list[dict] = []
+        self.observations: list[dict] = []
+
+    @contextmanager
+    def start_as_current_observation(self, **kwargs):
+        record = dict(kwargs)
+        self.observations.append(record)
+        class Observation:
+            def update(self, **updates):
+                record.update(updates)
+        yield Observation()
+
+    def get_current_trace_id(self):
+        return "test-trace-id"
 
     def get_prompt(self, name: str, **kwargs):
         return self.prompt
@@ -67,3 +80,14 @@ def test_agent_records_prompt_version_with_v4_observation_api(monkeypatch) -> No
     assert span_update["version"] == "3"
     assert propagated[0]["metadata"]["correlation_id"] == "req-12345678"
     assert propagated[-1]["prompt"] is client.prompt
+
+    retrieval, generation = client.observations
+    assert retrieval["name"] == "retrieval"
+    assert retrieval["as_type"] == "retriever"
+    assert retrieval["output"]["doc_count"] == 1
+    assert generation["as_type"] == "generation"
+    assert generation["model"] == agent.model
+    assert generation["prompt"] is client.prompt
+    assert generation["usage_details"]["input"] > 0
+    assert generation["usage_details"]["output"] > 0
+    assert generation["cost_details"]["output"] > 0

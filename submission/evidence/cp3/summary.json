@@ -1,0 +1,35 @@
+{
+  "baseline": {
+    "start": "2026-09-30T04:44:54.383652+00:00",
+    "end": "2026-09-30T04:44:57.875543+00:00",
+    "requests": 5,
+    "responses": 5,
+    "p95_ms": 1257,
+    "ttft_p95_ms": 50,
+    "above_2000_ms": 0,
+    "errors": 0,
+    "client_max_ms": 3322.2
+  },
+  "incident": {
+    "start": "2026-09-30T04:44:58.055484+00:00",
+    "end": "2026-09-30T04:45:12.831623+00:00",
+    "requests": 5,
+    "responses": 5,
+    "p95_ms": 2971,
+    "ttft_p95_ms": 50,
+    "above_2000_ms": 5,
+    "errors": 0,
+    "client_max_ms": 14613.9
+  },
+  "recovered": {
+    "start": "2026-09-30T04:45:13.070168+00:00",
+    "end": "2026-09-30T04:45:15.123785+00:00",
+    "requests": 5,
+    "responses": 5,
+    "p95_ms": 396,
+    "ttft_p95_ms": 50,
+    "above_2000_ms": 0,
+    "errors": 0,
+    "client_max_ms": 1917.3
+  }
+}

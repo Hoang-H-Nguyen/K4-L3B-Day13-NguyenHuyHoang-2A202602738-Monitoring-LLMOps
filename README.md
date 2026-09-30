@@ -190,6 +190,14 @@ day13-agent-request
 
 Không capture raw prompt/output chứa PII vì người dùng có thể nhập email, số điện thoại, CCCD hoặc nội dung nhạy cảm. Chỉ lưu preview đã scrub và metadata an toàn. Correlation ID phải xuất hiện trong trace metadata để nối trace với log.
 
+Mở dashboard runtime local để kiểm tra và chụp evidence 11:
+
+```bash
+python scripts/dashboard.py
+```
+
+Truy cập **http://127.0.0.1:8501**. Dashboard có sáu panel, mặc định 60 phút, refresh 30 giây, chọn lịch sử và tạm dừng để chụp. Xem [hướng dẫn dashboard](docs/DASHBOARD_SETUP.md).
+
 Dashboard dùng `data/logs.jsonl` làm nguồn chuẩn và giữ đúng 6 panel trong `config/dashboard.yaml`. Panel latency phải có P50/P95/P99 và TTFT; panel errors phải thể hiện cả retrieval success. Sau đó hoàn thiện:
 
 - `config/slo.yaml`: giải thích hoặc điều chỉnh SLO, tính error budget;

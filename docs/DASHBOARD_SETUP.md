@@ -6,6 +6,27 @@ Trường `query` trong YAML là pseudocode mô tả phép tính, không phải 
 
 Lab không bắt buộc một công cụ dashboard cụ thể. Bạn có thể dùng Streamlit, notebook, Grafana, script local tạo biểu đồ hoặc công cụ tương đương. Điều quan trọng khi chấm là dashboard runtime có dữ liệu thật từ `data/logs.jsonl`, đủ sáu panel, đọc được time range/đơn vị/threshold và khớp logic trong `config/dashboard.yaml`.
 
+## Dashboard local đã có trong repo
+
+Mở terminal tại gốc repo, activate venv và chạy:
+
+```bash
+source .venv/bin/activate
+python scripts/dashboard.py
+```
+
+Mở **http://127.0.0.1:8501** trong trình duyệt. Không cần cài Streamlit hoặc thư viện mới. Server chỉ lắng nghe localhost và đọc `data/logs.jsonl`; không cần API đang chạy để xem log cũ.
+
+- Mặc định: 60 phút gần nhất, tự cập nhật 30 giây theo contract.
+- Chọn **Lịch sử — kết thúc tại log mới nhất** nếu log đã cũ và cửa sổ live không có dữ liệu. Màn hình ghi rõ chế độ lịch sử và thời gian đang xem.
+- Chọn **Lịch sử — chọn thời điểm kết thúc** để xem một khoảng cụ thể; thời điểm nhập theo múi giờ trình duyệt.
+- Nút **Tạm dừng để chụp** cố định số liệu đang hiển thị. Nút tiếp tục bật lại cập nhật tự động.
+- Mọi threshold lấy từ `config/dashboard.yaml`. Traffic so sánh trung bình request/phút trong cửa sổ; cost so sánh tổng cửa sổ; token so sánh riêng tổng input và output.
+- Error rate = số `request_failed` / số `request_received`. Retrieval success dùng mọi log API có `tool_name=retrieval` và `tool_success` boolean, gồm cả response thành công; không chỉ đếm event lỗi.
+- P50/P95/P99 dùng nearest-rank. Không có mẫu thì hiển thị dấu gạch, không giả định success 100%.
+
+Để chụp ảnh 11: mở rộng cửa sổ browser, chọn khoảng có dữ liệu, nhấn tạm dừng, giữ tiêu đề và thanh thời gian cùng đủ sáu panel trong ảnh. Có thể giảm zoom browser hoặc chụp hai ảnh nếu màn hình nhỏ. Lưu `submission/evidence/11-dashboard-overview.png`, rồi dẫn trong report. Không dùng ảnh validator thay ảnh runtime.
+
 ## Mapping dữ liệu
 
 | Panel | Event/field | Phép tổng hợp |

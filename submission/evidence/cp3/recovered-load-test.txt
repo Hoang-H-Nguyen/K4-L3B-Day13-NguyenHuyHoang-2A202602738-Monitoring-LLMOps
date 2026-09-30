@@ -1,0 +1,6 @@
+Challenge: day13-k4-l3b-monitoring-llmops-v1 | Cohort: K4
+[200] req-d2f4b3fa | monitoring | 757.6ms
+[200] req-c21b541c | monitoring | 757.1ms
+[200] req-3a1d6433 | monitoring | 1917.3ms
+[200] req-9da2e814 | monitoring | 1916.9ms
+[200] req-309ce6d5 | monitoring | 1916.6ms

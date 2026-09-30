@@ -21,6 +21,7 @@ class AgentResult:
     tokens_out: int
     cost_usd: float
     quality_score: float
+    trace_id: str | None = None
 
 
 class LabAgent:
@@ -51,7 +52,12 @@ class LabAgent:
             },
         ):
             started = time.perf_counter()
-            docs = retrieve(message)
+            with langfuse_client.start_as_current_observation(
+                name="retrieval", as_type="retriever",
+                input={"query_preview": summarize_text(message)},
+            ) as retrieval:
+                docs = retrieve(message)
+                retrieval.update(output={"doc_count": len(docs)})
             prompt = resolve_prompt(
                 langfuse_client,
                 feature=feature,
@@ -71,10 +77,20 @@ class LabAgent:
                 },
                 version=prompt.version,
             )
-            # TODO (CP2): instrument retrieve() and FakeLLM.generate() as child
-            # observations. The nested generation must receive prompt, usage and cost.
             with propagate_attributes(prompt=prompt.managed_prompt):
-                response = self.llm.generate(prompt.text)
+                with langfuse_client.start_as_current_observation(
+                    name="generation", as_type="generation", model=self.model,
+                    prompt=prompt.managed_prompt,
+                    input={"prompt_preview": summarize_text(prompt.text)},
+                ) as generation:
+                    response = self.llm.generate(prompt.text)
+                    generation.update(
+                        output={"answer_preview": summarize_text(response.text)},
+                        usage_details={"input": response.usage.input_tokens,
+                                       "output": response.usage.output_tokens},
+                        cost_details={"input": response.usage.input_tokens * 3 / 1_000_000,
+                                      "output": response.usage.output_tokens * 15 / 1_000_000},
+                    )
             quality_score = self._heuristic_quality(message, response.text, docs)
             latency_ms = int((time.perf_counter() - started) * 1000)
             cost_usd = self._estimate_cost(response.usage.input_tokens, response.usage.output_tokens)
@@ -96,6 +112,7 @@ class LabAgent:
             tokens_out=response.usage.output_tokens,
             cost_usd=cost_usd,
             quality_score=quality_score,
+            trace_id=langfuse_client.get_current_trace_id(),
         )
 
     def _estimate_cost(self, tokens_in: int, tokens_out: int) -> float:
